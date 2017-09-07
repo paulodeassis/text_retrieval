@@ -41,18 +41,26 @@ public class Indexer {
 			writer = new IndexWriter(indexDirectory, config);
 			break;
 		case STEMING:
-			//TODO
+			StandardAnalyzer stopWordAnalyser_ = new StandardAnalyzer();
+			config = new IndexWriterConfig(stopWordAnalyser_);
 			break;
 		case N_GRAM:
 			//TODO
 			break;
 		default:
 			config = new IndexWriterConfig();
-			writer = new IndexWriter(indexDirectory, config);
+			
 			break;
 		}
+		writer = new IndexWriter(indexDirectory, config);
 	}
 	
+	private CharArraySet getSteming() {
+		// TODO Auto-generated method stub
+		return null;
+		
+	}
+
 	public void close() throws CorruptIndexException, IOException{
 		writer.close();
 	}
