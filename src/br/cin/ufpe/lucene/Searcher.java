@@ -25,16 +25,16 @@ public class Searcher {
 	Analyzer analyzer;
 	
 	public Searcher(String indexDirectoryPath) throws IOException {
-		FSDirectory.open(Paths.get(LuceneKonstanten.FILE_PATH));
+		FSDirectory.open(Paths.get(LuceneConstant.FILE_PATH));
 		//Directory indexDirectory = FSDirectory.open(Paths.get(LuceneKonstanten.FILE_PATH));
-		indexReaderQueryParser = DirectoryReader.open(FSDirectory.open(Paths.get(LuceneKonstanten.FILE_PATH)));
+		indexReaderQueryParser = DirectoryReader.open(FSDirectory.open(Paths.get(LuceneConstant.FILE_PATH)));
 		indexSearcher = new IndexSearcher(indexReaderQueryParser);
-		queryParser =  new QueryParser(LuceneKonstanten.CONTENTS, new StandardAnalyzer());
+		queryParser =  new QueryParser(LuceneConstant.CONTENTS, new StandardAnalyzer());
 	}
 	
 	public TopDocs search(String searchQuery) throws IOException, ParseException {
 		query = queryParser.parse(searchQuery);
-		return indexSearcher.search(query, LuceneKonstanten.MAX_SEARCH);
+		return indexSearcher.search(query, LuceneConstant.MAX_SEARCH);
 	}
 	
 	public Document getDocument(ScoreDoc scoreDoc) throws CorruptIndexException, IOException {
