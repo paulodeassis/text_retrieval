@@ -8,8 +8,19 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.analysis.hunspell.HunspellStemFilter;
+import org.apache.lucene.analysis.ngram.NGramFilterFactory;
+import org.apache.lucene.analysis.ngram.NGramTokenizer;
+import org.apache.lucene.analysis.snowball.SnowballFilter;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.standard.StandardFilter;
+import org.apache.lucene.analysis.standard.StandardTokenizer;
+import org.apache.lucene.analysis.util.StemmerUtil;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
@@ -19,13 +30,16 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import br.cin.ufpe.lucene.CustomIndexOption;
+import org.apache.lucene.util.Version;
+import org.tartarus.snowball.ext.EnglishStemmer;
+import org.tartarus.snowball.ext.PorterStemmer;
 
 public class Indexer {
 	private IndexWriter writer;
 	private IndexWriterConfig config;
 	private FieldType fieldType;
 	private Indexer indexer;
+	String dataDir = "Data";
 	
 	public Indexer(String indexDirectoryPath, CustomIndexOption customIndexOption) throws IOException{
 		//Indexes Directory
@@ -35,30 +49,54 @@ public class Indexer {
 		
 		switch(customIndexOption) {
 		case STOPWORDS:
-			/*Creating stopwords*/
-			StandardAnalyzer stopWordAnalyser = new StandardAnalyzer(getStopwords());
+			/*Creating Analyzer with stopwords*/
+			//indexer = new Indexer(LuceneConstant.STOPWORDS_INDEX_DATABASE, CustomIndexOption.STOPWORDS);
+			EnglishAnalyzer stopWordAnalyser = new EnglishAnalyzer(getStopwords());			
+			int numIndexedStopword;
+			long starttimeStopword = System.currentTimeMillis();
 			config = new IndexWriterConfig(stopWordAnalyser);
 			writer = new IndexWriter(indexDirectory, config);
+			numIndexedStopword = createIndex();
+			long endTimeStopword = System.currentTimeMillis();
+			System.out.println(numIndexedStopword+" File indexed, time taken: "+(endTimeStopword-starttimeStopword)+" ms");
+			close();
 			break;
 		case STEMING:
-			StandardAnalyzer stopWordAnalyser_ = new StandardAnalyzer();
-			config = new IndexWriterConfig(stopWordAnalyser_);
+			/*Creating Analyzer with stopwords and stemming*/
+			//indexer = new Indexer(LuceneConstant.STEMING_INDEX_DATABASE, CustomIndexOption.STEMING);
+			int numIndexedSteming;
+			StandardAnalyzer stemmerAnalyzer = new StandardAnalyzer();
+			config = new IndexWriterConfig(stemmerAnalyzer);
+			writer = new IndexWriter(indexDirectory, config);
+			long starttimeSteming = System.currentTimeMillis();
+			numIndexedSteming = createIndex();
+			long endTimeSteming = System.currentTimeMillis();
+			//close();
+			System.out.println(numIndexedSteming+" File indexed, time taken: "+(endTimeSteming-starttimeSteming)+" ms");
+			close();
 			break;
 		case N_GRAM:
-			//TODO
+			System.out.println("NÃO FOI IMPLEMENTADO!");
+			/*indexer = new Indexer(LuceneConstant.N_GRAM_INDEX_DATABASE, CustomIndexOption.N_GRAM);
+			int numIndexedNGram;
+			long starttimeNGram = System.currentTimeMillis();
+			numIndexedNGram = indexer.createIndex(dataDir, new TextFileFilter());
+			long endTimeNGram = System.currentTimeMillis();
+			indexer.close();
+			System.out.println(numIndexedNGram+" File indexed, time taken: "+(endTimeNGram-starttimeNGram)+" ms");*/
 			break;
 		default:
-			config = new IndexWriterConfig();
-			
+			/*indexer = new Indexer(indexDir, CustomIndexOption.NONE);
+			int numIndexed;
+			long starttime = System.currentTimeMillis();
+			numIndexed = indexer.createIndex(dataDir, new TextFileFilter());
+			long endTime = System.currentTimeMillis();
+			indexer.close();
+			System.out.println(numIndexed+" File indexed, time taken: "+(endTime-starttime)+" ms");*/
 			break;
 		}
-		writer = new IndexWriter(indexDirectory, config);
-	}
-	
-	private CharArraySet getSteming() {
-		// TODO Auto-generated method stub
-		return null;
 		
+		//writer = new IndexWriter(indexDirectory, config);
 	}
 
 	public void close() throws CorruptIndexException, IOException{
@@ -109,8 +147,9 @@ public class Indexer {
 		writer.addDocument(document);
 	}
 	
-	public int createIndex(String dataDirPath, FileFilter filter)throws IOException {
-		File [] files = new File(dataDirPath).listFiles();
+	public int createIndex()throws IOException {
+		FileFilter filter = new TextFileFilter();
+		File [] files = new File(dataDir).listFiles();
 		for(File file : files) {
 			if(!file.isDirectory() && !file.isHidden() && file.exists() && file.canRead() && filter.accept(file)) {
 				indexFile(file);

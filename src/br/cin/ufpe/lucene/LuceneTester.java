@@ -14,7 +14,7 @@ import org.apache.lucene.util.Version;
 public class LuceneTester {
 	String indexDir = "Index";
 	String dataDir = "Data";
-	Indexer indexer;
+	
 	Searcher searcher;
 
 	public static void main(String[] args) {
@@ -23,7 +23,8 @@ public class LuceneTester {
 			tester = new LuceneTester();
 			
 			/*Criando Index para Stopword*/
-			tester.createIndex(CustomIndexOption.STOPWORDS);
+			//tester.createIndex(CustomIndexOption.STEMING);
+			Indexer indexer = new Indexer(LuceneConstant.N_GRAM_INDEX_DATABASE, CustomIndexOption.STEMING);
 			
 			/*Search works only for stopwords*/
 			tester.search("Learning");
@@ -36,36 +37,35 @@ public class LuceneTester {
 
 	}
 	
-	private void createIndex(CustomIndexOption cio) throws IOException {
+	/*private void createIndex(CustomIndexOption cio) throws IOException {
 		switch(cio) {
 		case STOPWORDS:
 			indexer = new Indexer(LuceneConstant.STOPWORDS_INDEX_DATABASE, CustomIndexOption.STOPWORDS);
 			int numIndexedStopword;
 			long starttimeStopword = System.currentTimeMillis();
-			numIndexedStopword = indexer.createIndex(dataDir, new TextFileFilter());
+			numIndexedStopword = indexer.createIndex(LuceneConstant.STOPWORDS_INDEX_DATABASE,new TextFileFilter());
 			long endTimeStopword = System.currentTimeMillis();
 			indexer.close();
 			System.out.println(numIndexedStopword+" File indexed, time taken: "+(endTimeStopword-starttimeStopword)+" ms");
 			break;
 		case STEMING:
-			System.out.println("NÃO FOI IMPLEMENTADO!");
-			/*indexer = new Indexer(LuceneConstant.STEMING_INDEX_DATABASE, CustomIndexOption.STEMING);
+			indexer = new Indexer(LuceneConstant.STEMING_INDEX_DATABASE, CustomIndexOption.STEMING);
 			int numIndexedSteming;
 			long starttimeSteming = System.currentTimeMillis();
 			numIndexedSteming = indexer.createIndex(dataDir, new TextFileFilter());
 			long endTimeSteming = System.currentTimeMillis();
 			indexer.close();
-			System.out.println(numIndexedSteming+" File indexed, time taken: "+(endTimeSteming-starttimeSteming)+" ms");*/
+			System.out.println(numIndexedSteming+" File indexed, time taken: "+(endTimeSteming-starttimeSteming)+" ms");
 			break;
 		case N_GRAM:
 			System.out.println("NÃO FOI IMPLEMENTADO!");
-			/*indexer = new Indexer(LuceneConstant.N_GRAM_INDEX_DATABASE, CustomIndexOption.N_GRAM);
+			indexer = new Indexer(LuceneConstant.N_GRAM_INDEX_DATABASE, CustomIndexOption.N_GRAM);
 			int numIndexedNGram;
 			long starttimeNGram = System.currentTimeMillis();
 			numIndexedNGram = indexer.createIndex(dataDir, new TextFileFilter());
 			long endTimeNGram = System.currentTimeMillis();
 			indexer.close();
-			System.out.println(numIndexedNGram+" File indexed, time taken: "+(endTimeNGram-starttimeNGram)+" ms");*/
+			System.out.println(numIndexedNGram+" File indexed, time taken: "+(endTimeNGram-starttimeNGram)+" ms");
 			break;
 		default:
 			indexer = new Indexer(indexDir, CustomIndexOption.NONE);
@@ -77,7 +77,7 @@ public class LuceneTester {
 			System.out.println(numIndexed+" File indexed, time taken: "+(endTime-starttime)+" ms");
 		}
 
-	}
+	}*/
 	
 	private void search(String searchQuery) throws IOException, ParseException {
 		searcher = new Searcher(indexDir);
