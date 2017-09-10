@@ -58,7 +58,7 @@ public class Indexer {
 			writer = new IndexWriter(indexDirectory, config);
 			numIndexedStopword = createIndex();
 			long endTimeStopword = System.currentTimeMillis();
-			System.out.println(numIndexedStopword+" File indexed, time taken: "+(endTimeStopword-starttimeStopword)+" ms");
+			System.out.println(numIndexedStopword+" File indexed for Stopwords, time taken: "+(endTimeStopword-starttimeStopword)+" ms");
 			close();
 			break;
 		case STEMING:
@@ -71,12 +71,11 @@ public class Indexer {
 			long starttimeSteming = System.currentTimeMillis();
 			numIndexedSteming = createIndex();
 			long endTimeSteming = System.currentTimeMillis();
-			//close();
-			System.out.println(numIndexedSteming+" File indexed, time taken: "+(endTimeSteming-starttimeSteming)+" ms");
+			System.out.println(numIndexedSteming+" File indexed for Stemming, time taken: "+(endTimeSteming-starttimeSteming)+" ms");
 			close();
 			break;
 		case N_GRAM:
-			System.out.println("NÃO FOI IMPLEMENTADO!");
+			System.out.println("N-GRAM NÃO FOI IMPLEMENTADO!");
 			/*indexer = new Indexer(LuceneConstant.N_GRAM_INDEX_DATABASE, CustomIndexOption.N_GRAM);
 			int numIndexedNGram;
 			long starttimeNGram = System.currentTimeMillis();

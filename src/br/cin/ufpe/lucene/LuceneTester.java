@@ -23,18 +23,20 @@ public class LuceneTester {
 			tester = new LuceneTester();
 			
 			/*Criando Index para Stopword*/
-			//tester.createIndex(CustomIndexOption.STEMING);
-			Indexer indexer = new Indexer(LuceneConstant.N_GRAM_INDEX_DATABASE, CustomIndexOption.STEMING);
+			Indexer indexerStopword = new Indexer(LuceneConstant.STOPWORDS_INDEX_DATABASE, CustomIndexOption.STOPWORDS);
+			
+			/*Criando Index para Stemming*/
+			Indexer indexerSteming = new Indexer(LuceneConstant.STEMING_INDEX_DATABASE, CustomIndexOption.STEMING);
+			
+			/*Criando Index para N-Gram*/
+			Indexer indexerNgram = new Indexer(LuceneConstant.N_GRAM_INDEX_DATABASE, CustomIndexOption.N_GRAM);
 			
 			/*Search works only for stopwords*/
-			tester.search("Learning");
+			//tester.search("Learning");
 			
 		}catch(IOException e) {
 			e.printStackTrace();
-		}catch(ParseException p) {
-			p.printStackTrace();
 		}
-
 	}
 	
 	/*private void createIndex(CustomIndexOption cio) throws IOException {
