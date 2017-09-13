@@ -17,22 +17,28 @@ public class LuceneTester {
 	
 	Searcher searcher;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ParseException {
 		LuceneTester tester;
 		try {
 			tester = new LuceneTester();
 			
-			/*Criando Index para Stopword*/
+			/*Creating Index for Stopword*/
 			Indexer indexerStopword = new Indexer(LuceneConstant.STOPWORDS_INDEX_DATABASE, CustomIndexOption.STOPWORDS);
 			
-			/*Criando Index para Stemming*/
+			/*Creating Index for Stemming*/
 			Indexer indexerSteming = new Indexer(LuceneConstant.STEMING_INDEX_DATABASE, CustomIndexOption.STEMING);
 			
-			/*Criando Index para N-Gram*/
+			/*Creating Index for N-Gram*/
 			Indexer indexerNgram = new Indexer(LuceneConstant.N_GRAM_INDEX_DATABASE, CustomIndexOption.N_GRAM);
 			
+			/*Creating Index for Stamming and Stopword*/
+			Indexer indexerStopwordAndStemming = new Indexer(LuceneConstant.STOPWORD_AND_STAMMING_INDEX_DATABASE, CustomIndexOption.STOPWORDS_AND_STAMMING);
+			
+			Indexer indexerNone = new Indexer(LuceneConstant.NONE, CustomIndexOption.NONE);
+			
 			/*Search works only for stopwords*/
-			//tester.search("Learning");
+			tester.search("Learning");
+			
 			
 		}catch(IOException e) {
 			e.printStackTrace();

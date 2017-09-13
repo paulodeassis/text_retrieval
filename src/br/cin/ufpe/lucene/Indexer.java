@@ -1,26 +1,29 @@
 package br.cin.ufpe.lucene;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.Analyzer.TokenStreamComponents;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.KeywordAnalyzer;
+import org.apache.lucene.analysis.core.SimpleAnalyzer;
+import org.apache.lucene.analysis.core.StopAnalyzer;
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
-import org.apache.lucene.analysis.hunspell.HunspellStemFilter;
-import org.apache.lucene.analysis.ngram.NGramFilterFactory;
 import org.apache.lucene.analysis.ngram.NGramTokenizer;
-import org.apache.lucene.analysis.snowball.SnowballFilter;
+import org.apache.lucene.analysis.standard.ClassicAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.standard.StandardFilter;
-import org.apache.lucene.analysis.standard.StandardTokenizer;
-import org.apache.lucene.analysis.util.StemmerUtil;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
@@ -30,9 +33,6 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.Version;
-import org.tartarus.snowball.ext.EnglishStemmer;
-import org.tartarus.snowball.ext.PorterStemmer;
 
 public class Indexer {
 	private IndexWriter writer;
@@ -49,7 +49,7 @@ public class Indexer {
 		
 		switch(customIndexOption) {
 		case STOPWORDS:
-			/*Creating Analyzer with stopwords*/
+			/*Creating Analyzer eliminating stopwords no stemming*/
 			//indexer = new Indexer(LuceneConstant.STOPWORDS_INDEX_DATABASE, CustomIndexOption.STOPWORDS);
 			EnglishAnalyzer stopWordAnalyser = new EnglishAnalyzer(getStopwords());			
 			int numIndexedStopword;
@@ -62,10 +62,11 @@ public class Indexer {
 			close();
 			break;
 		case STEMING:
-			/*Creating Analyzer with stopwords and stemming*/
+			/*Creating Analyzer dont eliminate stopword but doing stemming*/
 			//indexer = new Indexer(LuceneConstant.STEMING_INDEX_DATABASE, CustomIndexOption.STEMING);
 			int numIndexedSteming;
-			StandardAnalyzer stemmerAnalyzer = new StandardAnalyzer();
+			CharArraySet emptyCharSet = new CharArraySet(new ArrayList<>(), true);
+			StandardAnalyzer stemmerAnalyzer = new StandardAnalyzer(emptyCharSet);
 			config = new IndexWriterConfig(stemmerAnalyzer);
 			writer = new IndexWriter(indexDirectory, config);
 			long starttimeSteming = System.currentTimeMillis();
@@ -75,27 +76,52 @@ public class Indexer {
 			close();
 			break;
 		case N_GRAM:
-			System.out.println("N-GRAM NÃO FOI IMPLEMENTADO!");
-			/*indexer = new Indexer(LuceneConstant.N_GRAM_INDEX_DATABASE, CustomIndexOption.N_GRAM);
-			int numIndexedNGram;
-			long starttimeNGram = System.currentTimeMillis();
-			numIndexedNGram = indexer.createIndex(dataDir, new TextFileFilter());
-			long endTimeNGram = System.currentTimeMillis();
-			indexer.close();
-			System.out.println(numIndexedNGram+" File indexed, time taken: "+(endTimeNGram-starttimeNGram)+" ms");*/
+			System.out.println("EM IMPLEMENTAÇÃO");
+			/*Creating Analyzer for NGram*/
+			/*FileFilter filter = new TextFileFilter();
+			File [] files = new File(dataDir).listFiles();
+		
+			for(int i=0;i<files.length;i++) {
+				Tokenizer source = new NGramTokenizer();
+				source.setReader(new FileReader(files[i]));
+				//StandardFilter sf = new StandardFilter(source);
+				
+				String z = source.toString();
+				if(filter.accept(files[i])) {
+					StandardAnalyzer ngramAnalyzer = new StandardAnalyzer(source);
+					ngramAnalyzer.tokenStream(z,z);
+					config = new IndexWriterConfig(ngramAnalyzer);
+					writer = new IndexWriter(indexDirectory, config);
+				}
+			}
+			close();*/
+			break;
+			
+		case STOPWORDS_AND_STAMMING:
+			/*Lucene default configuration considers both cases*/
+			int numIndexedStopwordAndSteming;
+			StandardAnalyzer stopwordAndStemmingAnalyzer = new StandardAnalyzer();
+			config = new IndexWriterConfig(stopwordAndStemmingAnalyzer);
+			writer = new IndexWriter(indexDirectory, config);
+			long starttimeStopwrodAndSteming = System.currentTimeMillis();
+			numIndexedStopwordAndSteming = createIndex();
+			long endTimeStopwordAndSteming = System.currentTimeMillis();
+			System.out.println(numIndexedStopwordAndSteming+" File indexed for Stopword and Stemming, time taken: "+(endTimeStopwordAndSteming-starttimeStopwrodAndSteming)+" ms");
+			close();
 			break;
 		default:
-			/*indexer = new Indexer(indexDir, CustomIndexOption.NONE);
-			int numIndexed;
-			long starttime = System.currentTimeMillis();
-			numIndexed = indexer.createIndex(dataDir, new TextFileFilter());
-			long endTime = System.currentTimeMillis();
-			indexer.close();
-			System.out.println(numIndexed+" File indexed, time taken: "+(endTime-starttime)+" ms");*/
+			CharArraySet noneEmptyCharSet = new CharArraySet(new ArrayList<>(), true);
+			EnglishAnalyzer noneAnalyser = new EnglishAnalyzer(noneEmptyCharSet);			
+			int numIndexedNone;
+			long starttimeNone = System.currentTimeMillis();
+			config = new IndexWriterConfig(noneAnalyser);
+			writer = new IndexWriter(indexDirectory, config);
+			numIndexedNone = createIndex();
+			long endTimeNone = System.currentTimeMillis();
+			System.out.println(numIndexedNone+" File indexed for Stopwords, time taken: "+(endTimeNone-starttimeNone)+" ms");
+			close();
 			break;
 		}
-		
-		//writer = new IndexWriter(indexDirectory, config);
 	}
 
 	public void close() throws CorruptIndexException, IOException{
@@ -156,6 +182,15 @@ public class Indexer {
 		}
 		return writer.maxDoc();
 	}
+	
+	public int createIndexForNgram(File file) throws IOException {
+		FileFilter filter = new TextFileFilter();
+		if(!file.isDirectory() && !file.isHidden() && file.exists() && file.canRead() && filter.accept(file)) {
+			indexFile(file);
+		}
+		return writer.maxDoc();
+	}
+	
 	
 	private CharArraySet getStopwords() {
 		 final List<String> stopWords = Arrays.asList(
