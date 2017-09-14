@@ -46,12 +46,13 @@ public class Indexer {
 		Directory indexDirectory = FSDirectory.open(Paths.get(indexDirectoryPath));
 		config = new IndexWriterConfig();
 		config.setMaxBufferedDocs(1000);
+		CustomAnalyzer customAnalyzer = new CustomAnalyzer();
 		
 		switch(customIndexOption) {
 		case STOPWORDS:
 			/*Creating Analyzer eliminating stopwords no stemming*/
 			//indexer = new Indexer(LuceneConstant.STOPWORDS_INDEX_DATABASE, CustomIndexOption.STOPWORDS);
-			EnglishAnalyzer stopWordAnalyser = new EnglishAnalyzer(getStopwords());			
+			EnglishAnalyzer stopWordAnalyser = customAnalyzer.getStopwordAnalyzer();			
 			int numIndexedStopword;
 			long starttimeStopword = System.currentTimeMillis();
 			config = new IndexWriterConfig(stopWordAnalyser);
@@ -65,8 +66,8 @@ public class Indexer {
 			/*Creating Analyzer dont eliminate stopword but doing stemming*/
 			//indexer = new Indexer(LuceneConstant.STEMING_INDEX_DATABASE, CustomIndexOption.STEMING);
 			int numIndexedSteming;
-			CharArraySet emptyCharSet = new CharArraySet(new ArrayList<>(), true);
-			StandardAnalyzer stemmerAnalyzer = new StandardAnalyzer(emptyCharSet);
+			
+			StandardAnalyzer stemmerAnalyzer = customAnalyzer.getStemmingAnalyzer();
 			config = new IndexWriterConfig(stemmerAnalyzer);
 			writer = new IndexWriter(indexDirectory, config);
 			long starttimeSteming = System.currentTimeMillis();
@@ -100,7 +101,7 @@ public class Indexer {
 		case STOPWORDS_AND_STAMMING:
 			/*Lucene default configuration considers both cases*/
 			int numIndexedStopwordAndSteming;
-			StandardAnalyzer stopwordAndStemmingAnalyzer = new StandardAnalyzer();
+			StandardAnalyzer stopwordAndStemmingAnalyzer = customAnalyzer.getSemmingAndStopwordAnalyzer();
 			config = new IndexWriterConfig(stopwordAndStemmingAnalyzer);
 			writer = new IndexWriter(indexDirectory, config);
 			long starttimeStopwrodAndSteming = System.currentTimeMillis();
@@ -111,7 +112,7 @@ public class Indexer {
 			break;
 		default:
 			CharArraySet noneEmptyCharSet = new CharArraySet(new ArrayList<>(), true);
-			EnglishAnalyzer noneAnalyser = new EnglishAnalyzer(noneEmptyCharSet);			
+			EnglishAnalyzer noneAnalyser = customAnalyzer.getNoneAnalyzer();			
 			int numIndexedNone;
 			long starttimeNone = System.currentTimeMillis();
 			config = new IndexWriterConfig(noneAnalyser);
@@ -123,6 +124,12 @@ public class Indexer {
 			break;
 		}
 	}
+
+
+
+	
+
+	
 
 	public void close() throws CorruptIndexException, IOException{
 		writer.close();
@@ -189,18 +196,5 @@ public class Indexer {
 			indexFile(file);
 		}
 		return writer.maxDoc();
-	}
-	
-	
-	private CharArraySet getStopwords() {
-		 final List<String> stopWords = Arrays.asList(
-				   "a", "an", "and", "are", "as", "at", "be", "but", "by",
-				   "for", "if", "in", "into", "is", "it",
-				   "no", "not", "of", "on", "or", "such",
-				   "that", "the", "their", "then", "there", "these",
-				   "they", "this", "to", "was", "will", "with"
-		 );
-		 CharArraySet stopSet = new CharArraySet(stopWords, false);
-		 return stopSet;
 	}
 }

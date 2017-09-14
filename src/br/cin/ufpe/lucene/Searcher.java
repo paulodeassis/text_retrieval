@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Paths;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.DirectoryReader;
@@ -22,14 +21,13 @@ public class Searcher {
 	Query query;
 	IndexReader indexReaderQueryParser;
 	QueryParser queryParser;
-	Analyzer analyzer;
 	
-	public Searcher(String indexDirectoryPath) throws IOException {
-		FSDirectory.open(Paths.get(LuceneConstant.FILE_PATH));
-		//Directory indexDirectory = FSDirectory.open(Paths.get(LuceneKonstanten.FILE_PATH));
-		indexReaderQueryParser = DirectoryReader.open(FSDirectory.open(Paths.get(LuceneConstant.FILE_PATH)));
+	public Searcher(String indexDirectoryPath, Analyzer analyzer) throws IOException {
+		FSDirectory.open(Paths.get(indexDirectoryPath));
+		indexReaderQueryParser = DirectoryReader.open(FSDirectory.open(Paths.get(indexDirectoryPath)));
 		indexSearcher = new IndexSearcher(indexReaderQueryParser);
-		queryParser =  new QueryParser(LuceneConstant.CONTENTS, new StandardAnalyzer());
+		
+		queryParser =  new QueryParser(LuceneConstant.CONTENTS, analyzer);
 	}
 	
 	public TopDocs search(String searchQuery) throws IOException, ParseException {

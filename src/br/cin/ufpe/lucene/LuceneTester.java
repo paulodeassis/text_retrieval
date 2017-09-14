@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -21,23 +22,24 @@ public class LuceneTester {
 		LuceneTester tester;
 		try {
 			tester = new LuceneTester();
-			
+			//CustomAnalyzer customAnalyzer = new CustomAnalyzer();
 			/*Creating Index for Stopword*/
-			Indexer indexerStopword = new Indexer(LuceneConstant.STOPWORDS_INDEX_DATABASE, CustomIndexOption.STOPWORDS);
+			//Indexer indexerStopword = new Indexer(LuceneConstant.STOPWORDS_INDEX_DATABASE, CustomIndexOption.STOPWORDS);
 			
 			/*Creating Index for Stemming*/
 			Indexer indexerSteming = new Indexer(LuceneConstant.STEMING_INDEX_DATABASE, CustomIndexOption.STEMING);
 			
 			/*Creating Index for N-Gram*/
-			Indexer indexerNgram = new Indexer(LuceneConstant.N_GRAM_INDEX_DATABASE, CustomIndexOption.N_GRAM);
+			//Indexer indexerNgram = new Indexer(LuceneConstant.N_GRAM_INDEX_DATABASE, CustomIndexOption.N_GRAM);
 			
 			/*Creating Index for Stamming and Stopword*/
-			Indexer indexerStopwordAndStemming = new Indexer(LuceneConstant.STOPWORD_AND_STAMMING_INDEX_DATABASE, CustomIndexOption.STOPWORDS_AND_STAMMING);
+			//Indexer indexerStopwordAndStemming = new Indexer(LuceneConstant.STOPWORD_AND_STAMMING_INDEX_DATABASE, CustomIndexOption.STOPWORDS_AND_STAMMING);
 			
-			Indexer indexerNone = new Indexer(LuceneConstant.NONE, CustomIndexOption.NONE);
+			//Indexer indexerNone = new Indexer(LuceneConstant.NONE, CustomIndexOption.NONE);
+						
 			
 			/*Search works only for stopwords*/
-			tester.search("Learning");
+			tester.search("Learning".toLowerCase(),CustomIndexOption.STEMING);
 			
 			
 		}catch(IOException e) {
@@ -87,8 +89,26 @@ public class LuceneTester {
 
 	}*/
 	
-	private void search(String searchQuery) throws IOException, ParseException {
-		searcher = new Searcher(indexDir);
+	private void search(String searchQuery, CustomIndexOption indexOption) throws IOException, ParseException {
+		CustomAnalyzer customAnalyzer = new CustomAnalyzer();
+		switch (indexOption) {
+		case STOPWORDS:
+			searcher = new Searcher(LuceneConstant.STOPWORDS_INDEX_DATABASE, customAnalyzer.getStopwordAnalyzer());
+			break;
+		case STOPWORDS_AND_STAMMING:
+			searcher = new Searcher(LuceneConstant.STOPWORD_AND_STAMMING_INDEX_DATABASE, customAnalyzer.getSemmingAndStopwordAnalyzer());
+			break;
+		case STEMING:
+			searcher = new Searcher(LuceneConstant.STEMING_INDEX_DATABASE, customAnalyzer.getStemmingAnalyzer());
+			break;
+		case N_GRAM:
+			searcher = new Searcher(LuceneConstant.N_GRAM_INDEX_DATABASE, customAnalyzer.getNgramAnalyzer());
+			break;
+		default:
+			searcher = new Searcher(LuceneConstant.NONE, customAnalyzer.getNgramAnalyzer());
+			break;
+		}
+		
 		long startTime = System.currentTimeMillis();
 		TopDocs hits = searcher.search(searchQuery);
 		long endTime = System.currentTimeMillis();
