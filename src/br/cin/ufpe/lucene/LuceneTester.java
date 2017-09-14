@@ -24,22 +24,21 @@ public class LuceneTester {
 			tester = new LuceneTester();
 			//CustomAnalyzer customAnalyzer = new CustomAnalyzer();
 			/*Creating Index for Stopword*/
-			//Indexer indexerStopword = new Indexer(LuceneConstant.STOPWORDS_INDEX_DATABASE, CustomIndexOption.STOPWORDS);
+			Indexer indexerStopword = new Indexer(LuceneConstant.STOPWORDS_INDEX_DATABASE, CustomIndexOption.STOPWORDS);
 			
 			/*Creating Index for Stemming*/
-			Indexer indexerSteming = new Indexer(LuceneConstant.STEMING_INDEX_DATABASE, CustomIndexOption.STEMING);
+			//Indexer indexerSteming = new Indexer(LuceneConstant.STEMING_INDEX_DATABASE, CustomIndexOption.STEMING);
 			
 			/*Creating Index for N-Gram*/
-			//Indexer indexerNgram = new Indexer(LuceneConstant.N_GRAM_INDEX_DATABASE, CustomIndexOption.N_GRAM);
+			Indexer indexerNgram = new Indexer(LuceneConstant.N_GRAM_INDEX_DATABASE, CustomIndexOption.N_GRAM);
 			
 			/*Creating Index for Stamming and Stopword*/
 			//Indexer indexerStopwordAndStemming = new Indexer(LuceneConstant.STOPWORD_AND_STAMMING_INDEX_DATABASE, CustomIndexOption.STOPWORDS_AND_STAMMING);
 			
 			//Indexer indexerNone = new Indexer(LuceneConstant.NONE, CustomIndexOption.NONE);
 						
-			
 			/*Search works only for stopwords*/
-			tester.search("Learning".toLowerCase(),CustomIndexOption.STEMING);
+			//tester.search("neural".toLowerCase(),CustomIndexOption.STEMING);
 			
 			
 		}catch(IOException e) {

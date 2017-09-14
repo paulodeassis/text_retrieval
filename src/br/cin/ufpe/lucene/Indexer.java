@@ -7,23 +7,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.Analyzer.TokenStreamComponents;
 import org.apache.lucene.analysis.CharArraySet;
-import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.core.KeywordAnalyzer;
-import org.apache.lucene.analysis.core.SimpleAnalyzer;
-import org.apache.lucene.analysis.core.StopAnalyzer;
-import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.ngram.NGramTokenizer;
-import org.apache.lucene.analysis.standard.ClassicAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.analysis.standard.StandardFilter;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
@@ -77,25 +68,30 @@ public class Indexer {
 			close();
 			break;
 		case N_GRAM:
-			System.out.println("EM IMPLEMENTAÇÃO");
-			/*Creating Analyzer for NGram*/
-			/*FileFilter filter = new TextFileFilter();
+			//Creating Analyzer for NGram*/
+			FileFilter filter = new TextFileFilter();
 			File [] files = new File(dataDir).listFiles();
-		
+					
 			for(int i=0;i<files.length;i++) {
-				Tokenizer source = new NGramTokenizer();
-				source.setReader(new FileReader(files[i]));
-				//StandardFilter sf = new StandardFilter(source);
-				
-				String z = source.toString();
-				if(filter.accept(files[i])) {
-					StandardAnalyzer ngramAnalyzer = new StandardAnalyzer(source);
-					ngramAnalyzer.tokenStream(z,z);
-					config = new IndexWriterConfig(ngramAnalyzer);
-					writer = new IndexWriter(indexDirectory, config);
-				}
+				Tokenizer ngramTokenizer = new NGramTokenizer();
+				ngramTokenizer.setReader(new FileReader(files[i]));
+				CharTermAttribute charAtribute = ngramTokenizer.addAttribute(CharTermAttribute.class);
+				ngramTokenizer.reset();
+					String z;
+					z = ngramTokenizer.toString();					
+					if(filter.accept(files[i])) {
+						StandardAnalyzer ngramAnalyzer = new StandardAnalyzer();
+						ngramAnalyzer.tokenStream("titulo",z);
+						config = new IndexWriterConfig(ngramAnalyzer);
+						writer = new IndexWriter(indexDirectory, config);
+						int numIndexedNgram;
+						long starttimeNgram = System.currentTimeMillis();
+						numIndexedNgram = createIndex();
+						long endTimeNgram = System.currentTimeMillis();
+						System.out.println(numIndexedNgram+" File indexed for Ngram, time taken: "+(endTimeNgram-starttimeNgram)+" ms");
+						writer.close();
+					}
 			}
-			close();*/
 			break;
 			
 		case STOPWORDS_AND_STAMMING:
@@ -108,6 +104,7 @@ public class Indexer {
 			numIndexedStopwordAndSteming = createIndex();
 			long endTimeStopwordAndSteming = System.currentTimeMillis();
 			System.out.println(numIndexedStopwordAndSteming+" File indexed for Stopword and Stemming, time taken: "+(endTimeStopwordAndSteming-starttimeStopwrodAndSteming)+" ms");
+			writer.notifyAll();
 			close();
 			break;
 		default:
@@ -120,15 +117,11 @@ public class Indexer {
 			numIndexedNone = createIndex();
 			long endTimeNone = System.currentTimeMillis();
 			System.out.println(numIndexedNone+" File indexed for Stopwords, time taken: "+(endTimeNone-starttimeNone)+" ms");
+			writer.notifyAll();
 			close();
 			break;
 		}
 	}
-
-
-
-	
-
 	
 
 	public void close() throws CorruptIndexException, IOException{
@@ -150,6 +143,14 @@ public class Indexer {
 		Document document = new Document();
 		fieldType = new FieldType();
 		fieldType.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS);
+		
+		/*BufferedReader br = new BufferedReader(new FileReader(file));
+		String line = "";
+		List<Document> documentos = new ArrayList<>();
+		int linha = 1;
+		while ((line = br.readLine()) != null) {
+		String[] text = line.split(";");
+		}*/
 		
 		//Index file contents
 		Field contentField = new Field(LuceneConstant.CONTENTS, new FileReader(file), fieldType);
