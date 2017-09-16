@@ -36,14 +36,15 @@ public class Main {
 	private static final String INDEX_DIR_STOPWORDS = "index_stoprword";
 	private static final String INDEX_DIR_STEMMING = "index_stemming";
 	private static final String INDEX_DIR_STOPWORDS_STEMMING = "index_stoprword_stemming";	
-	private static final String DATA_DIR = "Data";
-	private static final boolean CREATE_INDEX = false;
+	private static final String DATA_DIR = "Data";	
 	
 	private static final Analyzer NONE_ANALYZER = new StandardAnalyzer(new CharArraySet(new ArrayList<>(), true));
 	private static final Analyzer STEMMING_ANALYZER = new EnglishAnalyzer(new CharArraySet(new ArrayList<>(), true));
 	private static final Analyzer STOPWORD_ANALYZER = new StandardAnalyzer(getStopWords());
 	private static final Analyzer STOP_STEMMING_ANALYZER = new EnglishAnalyzer(getStopWords());
 	
+	private static final boolean CREATE_INDEX = false;
+	private static final boolean RUN_SEARCHES = true;
 	private static final boolean CONSULTA_3 = false;
 	
 	private static final String [] CAMPOS_BUSCA = {
@@ -53,8 +54,8 @@ public class Main {
 			};
 	
 	private static final String [] CONSULTAS = {
-				"Area Protection in Adversarial", 
-				"\"Area Protection in Adversarial\""
+				"Deep RNN for Sentiment Analysis and Pattern Recognition", 
+				"Sentiment Analysis and Deep Learning"
 			};
 
 	public static void main(String[] args) throws IOException, ParseException {
@@ -67,7 +68,8 @@ public class Main {
 			app.createIndex(INDEX_DIR_STOPWORDS_STEMMING, STOP_STEMMING_ANALYZER);			
 		}
 
-		app.runSearchs();
+		if(RUN_SEARCHES)
+			app.runSearchs();
 		
 	}
 	
@@ -244,6 +246,7 @@ public class Main {
 				doc.add(new StringField("linha", "" + linha, Field.Store.YES));
 				doc.add(new StringField("arquivo", file.getName(), Field.Store.YES));
 
+				System.out.println("documento: "+linha);
 				docs.add(doc);
 				linha++;
 				qtdDocumentosTotal++;
