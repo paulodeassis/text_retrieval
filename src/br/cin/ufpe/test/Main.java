@@ -36,13 +36,15 @@ public class Main {
 	private static final String INDEX_DIR_STOPWORDS = "index_stoprword";
 	private static final String INDEX_DIR_STEMMING = "index_stemming";
 	private static final String INDEX_DIR_STOPWORDS_STEMMING = "index_stoprword_stemming";	
-	private static final String DATA_DIR = "Data2";
+	private static final String DATA_DIR = "Data";
 	private static final boolean CREATE_INDEX = false;
 	
 	private static final Analyzer NONE_ANALYZER = new StandardAnalyzer(new CharArraySet(new ArrayList<>(), true));
 	private static final Analyzer STEMMING_ANALYZER = new EnglishAnalyzer(new CharArraySet(new ArrayList<>(), true));
 	private static final Analyzer STOPWORD_ANALYZER = new StandardAnalyzer(getStopWords());
 	private static final Analyzer STOP_STEMMING_ANALYZER = new EnglishAnalyzer(getStopWords());
+	
+	private static final boolean CONSULTA_3 = false;
 	
 	private static final String [] CAMPOS_BUSCA = {
 				"titulo", 
@@ -65,54 +67,82 @@ public class Main {
 			app.createIndex(INDEX_DIR_STOPWORDS_STEMMING, STOP_STEMMING_ANALYZER);			
 		}
 
+		app.runSearchs();
+		
+	}
+	
+	public void runSearchs() throws IOException, ParseException {
 		System.out.println("------------------------------------------------- CONSULTAS INDEXAÇÃO PADRÃO --------------------------------------------------");
-		IndexSearcher searcher_none = app.createSearcher(INDEX_DIR_NONE);
+		IndexSearcher searcher_none = createSearcher(INDEX_DIR_NONE);
 		QueryParser query_parser_none = new MultiFieldQueryParser(CAMPOS_BUSCA, NONE_ANALYZER);				
 		
 		//Consulta 1
 		Query query_none = query_parser_none.parse(CONSULTAS[0]);
-		app.search(searcher_none, query_none);
+		search(searcher_none, query_none);
 		
 		//Consulta 2
 		Query query_none2 = query_parser_none.parse(CONSULTAS[1]);
-		app.search(searcher_none, query_none2);
+		search(searcher_none, query_none2);
+		
+		if(CONSULTA_3) {
+			//Consulta 3
+			Query query_none3 = query_parser_none.parse(CONSULTAS[2]);
+			search(searcher_none, query_none3);
+		}
 		
 		System.out.println("------------------------------------------------- CONSULTAS STEMMING ----------------------------------------------------");
-		IndexSearcher searcher_stemming = app.createSearcher(INDEX_DIR_STOPWORDS);
+		IndexSearcher searcher_stemming = createSearcher(INDEX_DIR_STOPWORDS);
 		QueryParser query_parser_stemming = new MultiFieldQueryParser(CAMPOS_BUSCA, STEMMING_ANALYZER);
 		
 		//Consulta 1
 		Query query_stemming = query_parser_stemming.parse(CONSULTAS[0]);
-		app.search(searcher_stemming, query_stemming);
+		search(searcher_stemming, query_stemming);
 		
 		//Consulta 2		
 		Query query_stemming2 = query_parser_stemming.parse(CONSULTAS[1]);
-		app.search(searcher_stemming, query_stemming2);
+		search(searcher_stemming, query_stemming2);
+		
+		if(CONSULTA_3) {
+			//Consulta 3		
+			Query query_stemming3 = query_parser_stemming.parse(CONSULTAS[2]);
+			search(searcher_stemming, query_stemming3);
+		}
 		
 		System.out.println("------------------------------------------------- CONSULTAS STOPWORD -------------------------------------------------");
-		IndexSearcher searcher_stopwords = app.createSearcher(INDEX_DIR_STOPWORDS);
+		IndexSearcher searcher_stopwords = createSearcher(INDEX_DIR_STOPWORDS);
 		QueryParser query_parser_stopwords = new MultiFieldQueryParser(CAMPOS_BUSCA, STOPWORD_ANALYZER);
 		
 		//Consulta 1
 		Query query_stopwords = query_parser_stopwords.parse(CONSULTAS[0]);
-		app.search(searcher_stopwords, query_stopwords);
+		search(searcher_stopwords, query_stopwords);
 		
 		//Consulta 2
 		Query query_stopwords2 = query_parser_stopwords.parse(CONSULTAS[1]);
-		app.search(searcher_stopwords, query_stopwords2);
+		search(searcher_stopwords, query_stopwords2);
+		
+		if(CONSULTA_3) {
+			//Consulta 3
+			Query query_stopwords3 = query_parser_stopwords.parse(CONSULTAS[2]);
+			search(searcher_stopwords, query_stopwords3);
+		}
 		
 		System.out.println("------------------------------------------------- CONSULTAS STEMMING E STOPWORDS --------------------------------------------");
 
-		IndexSearcher searcher_stopwords_stemming = app.createSearcher(INDEX_DIR_STOPWORDS_STEMMING);
+		IndexSearcher searcher_stopwords_stemming = createSearcher(INDEX_DIR_STOPWORDS_STEMMING);
 		QueryParser query_parser_stopwords_stemming = new MultiFieldQueryParser(CAMPOS_BUSCA, STOP_STEMMING_ANALYZER);
 		
 		//Consulta 1
 		Query query_stopwords_stemming = query_parser_stopwords_stemming.parse(CONSULTAS[0]);
-		app.search(searcher_stopwords_stemming, query_stopwords_stemming);
+		search(searcher_stopwords_stemming, query_stopwords_stemming);
 		
 		//Consulta 2
 		Query query_stopwords_stemming2 = query_parser_stopwords_stemming.parse(CONSULTAS[1]);
-		app.search(searcher_stopwords_stemming, query_stopwords_stemming2);
+		search(searcher_stopwords_stemming, query_stopwords_stemming2);
+		
+		if(CONSULTA_3) {
+			Query query_stopwords_stemming3 = query_parser_stopwords_stemming.parse(CONSULTAS[2]);
+			search(searcher_stopwords_stemming, query_stopwords_stemming3);
+		}
 	}
 
 	public void search(IndexSearcher searcher, Query q) throws IOException {
