@@ -32,49 +32,75 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
 public class Main {
+	//Diretórios dos indices
 	private static final String INDEX_DIR_NONE = "index_none";
 	private static final String INDEX_DIR_STOPWORDS = "index_stoprword";
 	private static final String INDEX_DIR_STEMMING = "index_stemming";
-	private static final String INDEX_DIR_STOPWORDS_STEMMING = "index_stoprword_stemming";	
-	private static final String DATA_DIR = "Data";	
+	private static final String INDEX_DIR_STOPWORDS_STEMMING = "index_stoprword_stemming";
+	private static final String INDEX_DIR_NGRAM = "index_ngram";	
+	private static final String DATA_DIR = "Data";
 	
+	//Tamanho minimo e máximo do Ngram
+	public static final int MIN_GRAM = 1;
+	public static final int MAX_GRAM = 2;
+	
+	//Analizadores
 	private static final Analyzer NONE_ANALYZER = new StandardAnalyzer(new CharArraySet(new ArrayList<>(), true));
 	private static final Analyzer STEMMING_ANALYZER = new EnglishAnalyzer(new CharArraySet(new ArrayList<>(), true));
 	private static final Analyzer STOPWORD_ANALYZER = new StandardAnalyzer(getStopWords());
 	private static final Analyzer STOP_STEMMING_ANALYZER = new EnglishAnalyzer(getStopWords());
+	private static final Analyzer NGRAM_ANALYZER = new NgramAnalyzer(getStopWords());
 	
-	private static final boolean CREATE_INDEX = false;
-	private static final boolean RUN_SEARCHES = true;
+	//Variáveis de controle
+	private static final boolean CREATE_INDEX = true; //flag para criação do indice
+	private static final boolean RUN_SEARCHES = true; //flag para executar buscas
 	
-	private static final boolean RUN_SEARCH_NONE = true;
-	private static final boolean RUN_SEARCH_STOPWORDS = false;
-	private static final boolean RUN_SEARCH_STEMMING = false;
-	private static final boolean RUN_SEARCH_STOPWORDS_STEMMING = false;
+	private static final boolean RUN_SEARCH_NONE = false; //flag para busca por indexação padrão (sem stopword)
+	private static final boolean RUN_SEARCH_STOPWORDS = false; //flag para busca por indexação padrão (com stopword)
+	private static final boolean RUN_SEARCH_STEMMING = false; //flag para busca por stemming
+	private static final boolean RUN_SEARCH_STOPWORDS_STEMMING = false; //flag para busca por stemming e stopword
+	private static final boolean RUN_SEARCH_NGRAM = true; //flag para busca por ngram
 	
+	//Campos do documento indexados para busca
 	private static final String [] CAMPOS_BUSCA = {
 				"titulo", 
 				"autor", 
 				"resumo"
 			};
 	
+	//Consultas para indexação padrão (sem stopword)
+	/**ADICIONAR ,"<NOVA CONSULTA> */
 	private static final String [] CONSULTAS_NONE = {
 				"Deep RNN for Sentiment Analysis and Pattern Recognition", 
 				"Sentiment Analysis and Deep Learning"
 			};
 	
+	//Consultas para indexação por stemming
+	/**ADICIONAR ,"<NOVA CONSULTA> */
 	private static final String [] CONSULTAS_STEMMING = {
 			"Deep RNN for Sentiment Analysis and Pattern Recognition", 
 			"Sentiment Analysis and Deep Learning"
 		};
 	
+	//Consultas para indexação padrão (com stopword)
+	/**ADICIONAR ,"<NOVA CONSULTA> */
 	private static final String [] CONSULTAS_STOPWORD = {
 			"Deep RNN for Sentiment Analysis and Pattern Recognition", 
 			"Sentiment Analysis and Deep Learning"
 		};
 	
+	//Consultas para indexação por stemming e stopword
+	/**ADICIONAR ,"<NOVA CONSULTA> */
 	private static final String [] CONSULTAS_STOP_STEMMING = {
 			"Deep RNN for Sentiment Analysis and Pattern Recognition", 
 			"Sentiment Analysis and Deep Learning"
+		};
+	
+	//Consultas para indexação por ngram
+	/**ADICIONAR ,"<NOVA CONSULTA> */
+	private static final String [] CONSULTAS_NGRAM = {
+			"Deep Learning", 
+			"Artificial Inteligence"
 		};
 
 	public static void main(String[] args) throws IOException, ParseException {
@@ -84,7 +110,8 @@ public class Main {
 			app.createIndex(INDEX_DIR_NONE, NONE_ANALYZER);
 			app.createIndex(INDEX_DIR_STEMMING, STEMMING_ANALYZER);
 			app.createIndex(INDEX_DIR_STOPWORDS, STOPWORD_ANALYZER);
-			app.createIndex(INDEX_DIR_STOPWORDS_STEMMING, STOP_STEMMING_ANALYZER);			
+			app.createIndex(INDEX_DIR_STOPWORDS_STEMMING, STOP_STEMMING_ANALYZER);	
+			app.createIndex(INDEX_DIR_NGRAM, NGRAM_ANALYZER);
 		}
 
 		if(RUN_SEARCHES)
@@ -136,6 +163,18 @@ public class Main {
 			for(String c : CONSULTAS_STOP_STEMMING) {
 				Query query_stopwords_stemming = query_parser_stopwords_stemming.parse(c);
 				search(searcher_stopwords_stemming, query_stopwords_stemming);
+			}
+		}
+		
+		if(RUN_SEARCH_NGRAM) {
+			System.out.println("------------------------------------------------- CONSULTAS N-GRAM --------------------------------------------");
+			
+			IndexSearcher searcher_ngram = createSearcher(INDEX_DIR_NGRAM);
+			QueryParser query_parser_ngram = new MultiFieldQueryParser(CAMPOS_BUSCA, NGRAM_ANALYZER);
+			
+			for(String c : CONSULTAS_NGRAM) {
+				Query query_ngram = query_parser_ngram.parse(c);
+				search(searcher_ngram, query_ngram);
 			}
 		}
 	}
