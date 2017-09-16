@@ -52,13 +52,13 @@ public class Main {
 	private static final Analyzer NGRAM_ANALYZER = new NgramAnalyzer(getStopWords());
 	
 	//Variáveis de controle
-	private static final boolean CREATE_INDEX = true; //flag para criação do indice
+	private static final boolean CREATE_INDEX = false; //flag para criação do indice
 	private static final boolean RUN_SEARCHES = true; //flag para executar buscas
 	
-	private static final boolean RUN_SEARCH_NONE = false; //flag para busca por indexação padrão (sem stopword)
-	private static final boolean RUN_SEARCH_STOPWORDS = false; //flag para busca por indexação padrão (com stopword)
-	private static final boolean RUN_SEARCH_STEMMING = false; //flag para busca por stemming
-	private static final boolean RUN_SEARCH_STOPWORDS_STEMMING = false; //flag para busca por stemming e stopword
+	private static final boolean RUN_SEARCH_NONE = true; //flag para busca por indexação padrão (sem stopword)
+	private static final boolean RUN_SEARCH_STOPWORDS = true; //flag para busca por indexação padrão (com stopword)
+	private static final boolean RUN_SEARCH_STEMMING = true; //flag para busca por stemming
+	private static final boolean RUN_SEARCH_STOPWORDS_STEMMING = true; //flag para busca por stemming e stopword
 	private static final boolean RUN_SEARCH_NGRAM = true; //flag para busca por ngram
 	
 	//Campos do documento indexados para busca
@@ -71,36 +71,31 @@ public class Main {
 	//Consultas para indexação padrão (sem stopword)
 	/**ADICIONAR ,"<NOVA CONSULTA> */
 	private static final String [] CONSULTAS_NONE = {
-				"Deep RNN for Sentiment Analysis and Pattern Recognition", 
-				"Sentiment Analysis and Deep Learning"
+				"shallow"
 			};
 	
 	//Consultas para indexação por stemming
 	/**ADICIONAR ,"<NOVA CONSULTA> */
 	private static final String [] CONSULTAS_STEMMING = {
-			"Deep RNN for Sentiment Analysis and Pattern Recognition", 
-			"Sentiment Analysis and Deep Learning"
+			"shallow"
 		};
 	
 	//Consultas para indexação padrão (com stopword)
 	/**ADICIONAR ,"<NOVA CONSULTA> */
 	private static final String [] CONSULTAS_STOPWORD = {
-			"Deep RNN for Sentiment Analysis and Pattern Recognition", 
-			"Sentiment Analysis and Deep Learning"
+			"shallow"
 		};
 	
 	//Consultas para indexação por stemming e stopword
 	/**ADICIONAR ,"<NOVA CONSULTA> */
 	private static final String [] CONSULTAS_STOP_STEMMING = {
-			"Deep RNN for Sentiment Analysis and Pattern Recognition", 
-			"Sentiment Analysis and Deep Learning"
+			"shallow"
 		};
 	
 	//Consultas para indexação por ngram
 	/**ADICIONAR ,"<NOVA CONSULTA> */
 	private static final String [] CONSULTAS_NGRAM = {
-			"Deep Learning", 
-			"Artificial Inteligence"
+			"shallow"
 		};
 
 	public static void main(String[] args) throws IOException, ParseException {
