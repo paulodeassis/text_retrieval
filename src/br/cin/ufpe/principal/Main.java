@@ -1,4 +1,4 @@
-package br.cin.ufpe.test;
+package br.cin.ufpe.principal;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -45,7 +45,11 @@ public class Main {
 	
 	private static final boolean CREATE_INDEX = false;
 	private static final boolean RUN_SEARCHES = true;
-	private static final boolean CONSULTA_3 = false;
+	
+	private static final boolean RUN_SEARCH_NONE = true;
+	private static final boolean RUN_SEARCH_STOPWORDS = false;
+	private static final boolean RUN_SEARCH_STEMMING = false;
+	private static final boolean RUN_SEARCH_STOPWORDS_STEMMING = false;
 	
 	private static final String [] CAMPOS_BUSCA = {
 				"titulo", 
@@ -53,10 +57,25 @@ public class Main {
 				"resumo"
 			};
 	
-	private static final String [] CONSULTAS = {
+	private static final String [] CONSULTAS_NONE = {
 				"Deep RNN for Sentiment Analysis and Pattern Recognition", 
 				"Sentiment Analysis and Deep Learning"
 			};
+	
+	private static final String [] CONSULTAS_STEMMING = {
+			"Deep RNN for Sentiment Analysis and Pattern Recognition", 
+			"Sentiment Analysis and Deep Learning"
+		};
+	
+	private static final String [] CONSULTAS_STOPWORD = {
+			"Deep RNN for Sentiment Analysis and Pattern Recognition", 
+			"Sentiment Analysis and Deep Learning"
+		};
+	
+	private static final String [] CONSULTAS_STOP_STEMMING = {
+			"Deep RNN for Sentiment Analysis and Pattern Recognition", 
+			"Sentiment Analysis and Deep Learning"
+		};
 
 	public static void main(String[] args) throws IOException, ParseException {
 		Main app = new Main();
@@ -74,76 +93,50 @@ public class Main {
 	}
 	
 	public void runSearchs() throws IOException, ParseException {
-		System.out.println("------------------------------------------------- CONSULTAS INDEXAÇÃO PADRÃO --------------------------------------------------");
-		IndexSearcher searcher_none = createSearcher(INDEX_DIR_NONE);
-		QueryParser query_parser_none = new MultiFieldQueryParser(CAMPOS_BUSCA, NONE_ANALYZER);				
 		
-		//Consulta 1
-		Query query_none = query_parser_none.parse(CONSULTAS[0]);
-		search(searcher_none, query_none);
-		
-		//Consulta 2
-		Query query_none2 = query_parser_none.parse(CONSULTAS[1]);
-		search(searcher_none, query_none2);
-		
-		if(CONSULTA_3) {
-			//Consulta 3
-			Query query_none3 = query_parser_none.parse(CONSULTAS[2]);
-			search(searcher_none, query_none3);
+		if(RUN_SEARCH_NONE) {
+			System.out.println("------------------------------------------------- CONSULTAS INDEXAÇÃO PADRÃO --------------------------------------------------");
+			IndexSearcher searcher_none = createSearcher(INDEX_DIR_NONE);
+			QueryParser query_parser_none = new MultiFieldQueryParser(CAMPOS_BUSCA, NONE_ANALYZER);
+			
+			for(String c : CONSULTAS_NONE) {
+				Query query_none = query_parser_none.parse(c);
+				search(searcher_none, query_none);
+			}
 		}
 		
-		System.out.println("------------------------------------------------- CONSULTAS STEMMING ----------------------------------------------------");
-		IndexSearcher searcher_stemming = createSearcher(INDEX_DIR_STOPWORDS);
-		QueryParser query_parser_stemming = new MultiFieldQueryParser(CAMPOS_BUSCA, STEMMING_ANALYZER);
-		
-		//Consulta 1
-		Query query_stemming = query_parser_stemming.parse(CONSULTAS[0]);
-		search(searcher_stemming, query_stemming);
-		
-		//Consulta 2		
-		Query query_stemming2 = query_parser_stemming.parse(CONSULTAS[1]);
-		search(searcher_stemming, query_stemming2);
-		
-		if(CONSULTA_3) {
-			//Consulta 3		
-			Query query_stemming3 = query_parser_stemming.parse(CONSULTAS[2]);
-			search(searcher_stemming, query_stemming3);
+		if(RUN_SEARCH_STEMMING) {
+			System.out.println("------------------------------------------------- CONSULTAS STEMMING ----------------------------------------------------");
+			IndexSearcher searcher_stemming = createSearcher(INDEX_DIR_STOPWORDS);
+			QueryParser query_parser_stemming = new MultiFieldQueryParser(CAMPOS_BUSCA, STEMMING_ANALYZER);
+			
+			for(String c : CONSULTAS_STEMMING) {
+				Query query_stemming = query_parser_stemming.parse(c);
+				search(searcher_stemming, query_stemming);
+			}
 		}
 		
-		System.out.println("------------------------------------------------- CONSULTAS STOPWORD -------------------------------------------------");
-		IndexSearcher searcher_stopwords = createSearcher(INDEX_DIR_STOPWORDS);
-		QueryParser query_parser_stopwords = new MultiFieldQueryParser(CAMPOS_BUSCA, STOPWORD_ANALYZER);
-		
-		//Consulta 1
-		Query query_stopwords = query_parser_stopwords.parse(CONSULTAS[0]);
-		search(searcher_stopwords, query_stopwords);
-		
-		//Consulta 2
-		Query query_stopwords2 = query_parser_stopwords.parse(CONSULTAS[1]);
-		search(searcher_stopwords, query_stopwords2);
-		
-		if(CONSULTA_3) {
-			//Consulta 3
-			Query query_stopwords3 = query_parser_stopwords.parse(CONSULTAS[2]);
-			search(searcher_stopwords, query_stopwords3);
+		if(RUN_SEARCH_STOPWORDS) {
+			System.out.println("------------------------------------------------- CONSULTAS STOPWORD -------------------------------------------------");
+			IndexSearcher searcher_stopwords = createSearcher(INDEX_DIR_STOPWORDS);
+			QueryParser query_parser_stopwords = new MultiFieldQueryParser(CAMPOS_BUSCA, STOPWORD_ANALYZER);
+			
+			for(String c : CONSULTAS_STOPWORD) {
+				Query query_stopwords = query_parser_stopwords.parse(c);
+				search(searcher_stopwords, query_stopwords);
+			}
 		}
 		
-		System.out.println("------------------------------------------------- CONSULTAS STEMMING E STOPWORDS --------------------------------------------");
+		if(RUN_SEARCH_STOPWORDS_STEMMING) {
+			System.out.println("------------------------------------------------- CONSULTAS STEMMING E STOPWORDS --------------------------------------------");
 
-		IndexSearcher searcher_stopwords_stemming = createSearcher(INDEX_DIR_STOPWORDS_STEMMING);
-		QueryParser query_parser_stopwords_stemming = new MultiFieldQueryParser(CAMPOS_BUSCA, STOP_STEMMING_ANALYZER);
-		
-		//Consulta 1
-		Query query_stopwords_stemming = query_parser_stopwords_stemming.parse(CONSULTAS[0]);
-		search(searcher_stopwords_stemming, query_stopwords_stemming);
-		
-		//Consulta 2
-		Query query_stopwords_stemming2 = query_parser_stopwords_stemming.parse(CONSULTAS[1]);
-		search(searcher_stopwords_stemming, query_stopwords_stemming2);
-		
-		if(CONSULTA_3) {
-			Query query_stopwords_stemming3 = query_parser_stopwords_stemming.parse(CONSULTAS[2]);
-			search(searcher_stopwords_stemming, query_stopwords_stemming3);
+			IndexSearcher searcher_stopwords_stemming = createSearcher(INDEX_DIR_STOPWORDS_STEMMING);
+			QueryParser query_parser_stopwords_stemming = new MultiFieldQueryParser(CAMPOS_BUSCA, STOP_STEMMING_ANALYZER);
+			
+			for(String c : CONSULTAS_STOP_STEMMING) {
+				Query query_stopwords_stemming = query_parser_stopwords_stemming.parse(c);
+				search(searcher_stopwords_stemming, query_stopwords_stemming);
+			}
 		}
 	}
 
