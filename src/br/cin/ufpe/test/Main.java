@@ -2,7 +2,6 @@ package br.cin.ufpe.test;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -22,6 +21,7 @@ import org.apache.lucene.index.IndexOptions;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
@@ -36,41 +36,102 @@ public class Main {
 	private static final String INDEX_DIR_STOPWORDS = "index_stoprword";
 	private static final String INDEX_DIR_STEMMING = "index_stemming";
 	private static final String INDEX_DIR_STOPWORDS_STEMMING = "index_stoprword_stemming";	
-	private static final String DATA_DIR = "Data";
+	private static final String DATA_DIR = "Data2";
+	private static final boolean CREATE_INDEX = false;
+	
+	private static final Analyzer NONE_ANALYZER = new StandardAnalyzer(new CharArraySet(new ArrayList<>(), true));
+	private static final Analyzer STEMMING_ANALYZER = new EnglishAnalyzer(new CharArraySet(new ArrayList<>(), true));
+	private static final Analyzer STOPWORD_ANALYZER = new StandardAnalyzer(getStopWords());
+	private static final Analyzer STOP_STEMMING_ANALYZER = new EnglishAnalyzer(getStopWords());
+	
+	private static final String [] CAMPOS_BUSCA = {
+				"titulo", 
+				"autor", 
+				"resumo"
+			};
+	
+	private static final String [] CONSULTAS = {
+				"Area Protection in Adversarial", 
+				"\"Area Protection in Adversarial\""
+			};
 
 	public static void main(String[] args) throws IOException, ParseException {
 		Main app = new Main();
 
-		app.createIndex(INDEX_DIR_NONE, new StandardAnalyzer(new CharArraySet(new ArrayList<>(), true)));
-		app.createIndex(INDEX_DIR_STOPWORDS, new StandardAnalyzer(app.getStopWords()));
-		app.createIndex(INDEX_DIR_STEMMING, new EnglishAnalyzer(new CharArraySet(new ArrayList<>(), true)));
-		app.createIndex(INDEX_DIR_STOPWORDS_STEMMING, new EnglishAnalyzer(app.getStopWords()));
+		if(CREATE_INDEX) {						
+			app.createIndex(INDEX_DIR_NONE, NONE_ANALYZER);
+			app.createIndex(INDEX_DIR_STEMMING, STEMMING_ANALYZER);
+			app.createIndex(INDEX_DIR_STOPWORDS, STOPWORD_ANALYZER);
+			app.createIndex(INDEX_DIR_STOPWORDS_STEMMING, STOP_STEMMING_ANALYZER);			
+		}
 
+		System.out.println("------------------------------------------------- CONSULTAS INDEXAÇÃO PADRÃO --------------------------------------------------");
 		IndexSearcher searcher_none = app.createSearcher(INDEX_DIR_NONE);
-		QueryParser query_parser_none = new QueryParser("titulo", new EnglishAnalyzer(new CharArraySet(new ArrayList<>(), true)));
-		Query query_none = query_parser_none.parse("\"Comparison of Some\"");
+		QueryParser query_parser_none = new MultiFieldQueryParser(CAMPOS_BUSCA, NONE_ANALYZER);				
+		
+		//Consulta 1
+		Query query_none = query_parser_none.parse(CONSULTAS[0]);
 		app.search(searcher_none, query_none);
-
+		
+		//Consulta 2
+		Query query_none2 = query_parser_none.parse(CONSULTAS[1]);
+		app.search(searcher_none, query_none2);
+		
+		System.out.println("------------------------------------------------- CONSULTAS STEMMING ----------------------------------------------------");
+		IndexSearcher searcher_stemming = app.createSearcher(INDEX_DIR_STOPWORDS);
+		QueryParser query_parser_stemming = new MultiFieldQueryParser(CAMPOS_BUSCA, STEMMING_ANALYZER);
+		
+		//Consulta 1
+		Query query_stemming = query_parser_stemming.parse(CONSULTAS[0]);
+		app.search(searcher_stemming, query_stemming);
+		
+		//Consulta 2		
+		Query query_stemming2 = query_parser_stemming.parse(CONSULTAS[1]);
+		app.search(searcher_stemming, query_stemming2);
+		
+		System.out.println("------------------------------------------------- CONSULTAS STOPWORD -------------------------------------------------");
 		IndexSearcher searcher_stopwords = app.createSearcher(INDEX_DIR_STOPWORDS);
-		QueryParser query_parser_stopwords = new QueryParser("titulo", new EnglishAnalyzer(app.getStopWords()));
-		Query query_stopwords = query_parser_stopwords.parse("\"Area Protection in Adversarial\"");
+		QueryParser query_parser_stopwords = new MultiFieldQueryParser(CAMPOS_BUSCA, STOPWORD_ANALYZER);
+		
+		//Consulta 1
+		Query query_stopwords = query_parser_stopwords.parse(CONSULTAS[0]);
 		app.search(searcher_stopwords, query_stopwords);
+		
+		//Consulta 2
+		Query query_stopwords2 = query_parser_stopwords.parse(CONSULTAS[1]);
+		app.search(searcher_stopwords, query_stopwords2);
+		
+		System.out.println("------------------------------------------------- CONSULTAS STEMMING E STOPWORDS --------------------------------------------");
 
+		IndexSearcher searcher_stopwords_stemming = app.createSearcher(INDEX_DIR_STOPWORDS_STEMMING);
+		QueryParser query_parser_stopwords_stemming = new MultiFieldQueryParser(CAMPOS_BUSCA, STOP_STEMMING_ANALYZER);
+		
+		//Consulta 1
+		Query query_stopwords_stemming = query_parser_stopwords_stemming.parse(CONSULTAS[0]);
+		app.search(searcher_stopwords_stemming, query_stopwords_stemming);
+		
+		//Consulta 2
+		Query query_stopwords_stemming2 = query_parser_stopwords_stemming.parse(CONSULTAS[1]);
+		app.search(searcher_stopwords_stemming, query_stopwords_stemming2);
 	}
-	
-	//Analyzer analyzer = new SnowballAnalyzer(Version.LUCENE_35,language);
 
 	public void search(IndexSearcher searcher, Query q) throws IOException {
-		TopDocs hits = searcher.search(q, 100);
-		System.out.println("-----------------------------------------------------------------------");
+		TopDocs hits = searcher.search(q, 10);
+		System.out.println("*******************************************************************************************");
 		System.out.println(hits.totalHits + " documentos encontrados para consulta " + q.toString());
-		System.out.println("-----------------------------------------------------------------------");
+		System.out.println("*******************************************************************************************");
+		int resultado = 1;
 		for (ScoreDoc sd : hits.scoreDocs) {
 			Document d = searcher.doc(sd.doc);
+			System.out.println("["+resultado+"]");
 			System.out.println("Titulo: " + d.get("titulo")); 
+			System.out.println("Autor: "+d.get("autor"));
+			System.out.println("Link: "+d.get("link"));
 			System.out.println("Linha: " + d.get("linha")); 
 			System.out.println("Arquivo: " + d.get("arquivo") + "\n");
-		}		
+			resultado++;
+		}
+		System.out.println("");
 	}
 
 	public void createIndex(String dir, Analyzer analyzer) throws IOException {
@@ -82,20 +143,25 @@ public class Main {
 		writer.close();
 	}
 
-	private CharArraySet getStopWords() throws IOException {
-		List<String> stopWords = new ArrayList<>();
-		BufferedReader br = new BufferedReader(new FileReader("lista_stopwords.csv"));
-		String line = "";
+	private static CharArraySet getStopWords() {		
+		CharArraySet stopSet = null;
+		try {
+			List<String> stopWords = new ArrayList<>();
+			BufferedReader br = new BufferedReader(new FileReader("lista_stopwords.csv"));
+			String line = "";
 
-		while ((line = br.readLine()) != null) {
-			String[] text = line.split(";");
+			while ((line = br.readLine()) != null) {
+				String[] text = line.split(";");
 
-			for (String t : text) {
-				stopWords.add(t);
+				for (String t : text) {
+					stopWords.add(t);
+				}
 			}
+			br.close();
+			stopSet = new CharArraySet(stopWords, false);
+		}catch (Exception e) {
+			e.printStackTrace();
 		}
-		br.close();
-		CharArraySet stopSet = new CharArraySet(stopWords, false);
 		return stopSet;
 	}
 
@@ -106,29 +172,55 @@ public class Main {
 		titleType.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS);
 		titleType.setStored(true);
 		titleType.setTokenized(true);
+		
+		FieldType authorType = new FieldType();
+		//authorType.setIndexOptions(IndexOptions.DOCS_AND_FREQS);
+		authorType.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS);
+		authorType.setStored(true);
+		authorType.setOmitNorms(true);
+		authorType.setTokenized(true);
+		authorType.setStoreTermVectors(true);
+
+		FieldType summaryType = new FieldType();
+		//summaryType.setIndexOptions(IndexOptions.DOCS);
+		summaryType.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS);
+		summaryType.setStored(true);
+		summaryType.setTokenized(true);
+		summaryType.setStoreTermVectors(true);
+		summaryType.setStoreTermVectorPositions(true);
+		summaryType.setStoreTermVectorOffsets(true);
+		summaryType.setStoreTermVectorPayloads(true);
 
 		File[] files = new File(DATA_DIR).listFiles();
 		BufferedReader br;
 		String line = "";
-		int linha = 1;
+		int qtdDocumentosTotal = 1;
 		for (File file : files) {
 			br = new BufferedReader(new FileReader(file));
-
+			System.out.println("Indexando arquivo: "+ file.getName());
+			int linha = 1;
 			while ((line = br.readLine()) != null) {
 				String[] text = line.split(";");
 
 				Field titulo = new Field("titulo", text[0], titleType);
+				Field autor = new Field("autor", text[1], authorType);
+				Field resumo = new Field("resumo", text[2], summaryType);
 
 				Document doc = new Document();
 				doc.add(titulo);
+				doc.add(autor);
+				doc.add(resumo);
+				doc.add(new StringField("link", text[3], Field.Store.YES));
 				doc.add(new StringField("linha", "" + linha, Field.Store.YES));
-				doc.add(new StringField("arquivo", file.getCanonicalPath(), Field.Store.YES));
+				doc.add(new StringField("arquivo", file.getName(), Field.Store.YES));
 
 				docs.add(doc);
 				linha++;
+				qtdDocumentosTotal++;
 			}
+			System.out.println("Indexou "+linha+" documentos \n");
 		}
-
+		System.out.println("***** Total Documentos Indexados: "+qtdDocumentosTotal);
 		return docs;
 	}
 
