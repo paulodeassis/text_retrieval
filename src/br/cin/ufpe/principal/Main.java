@@ -42,7 +42,8 @@ public class Main {
 	
 	//Tamanho minimo e máximo do Ngram
 	public static final int MIN_GRAM = 1;
-	public static final int MAX_GRAM = 2;
+	public static final int MAX_GRAM = 3;
+	public static final int QTD_MAX_RESULTADOS = 10;
 	
 	//Analizadores
 	private static final Analyzer NONE_ANALYZER = new StandardAnalyzer(new CharArraySet(new ArrayList<>(), true));
@@ -56,46 +57,52 @@ public class Main {
 	private static final boolean RUN_SEARCHES = true; //flag para executar buscas
 	
 	private static final boolean RUN_SEARCH_NONE = true; //flag para busca por indexação padrão (sem stopword)
-	private static final boolean RUN_SEARCH_STOPWORDS = true; //flag para busca por indexação padrão (com stopword)
-	private static final boolean RUN_SEARCH_STEMMING = true; //flag para busca por stemming
-	private static final boolean RUN_SEARCH_STOPWORDS_STEMMING = true; //flag para busca por stemming e stopword
+	private static final boolean RUN_SEARCH_STOPWORDS = false; //flag para busca por indexação padrão (com stopword)
+	private static final boolean RUN_SEARCH_STEMMING = false; //flag para busca por stemming
+	private static final boolean RUN_SEARCH_STOPWORDS_STEMMING = false; //flag para busca por stemming e stopword
 	private static final boolean RUN_SEARCH_NGRAM = true; //flag para busca por ngram
+	
+	private static final String CONSULTA_1 = "\"recurrent neural network\"";
+	private static final String CONSULTA_2 = "\"convolutional neural network\"";
 	
 	//Campos do documento indexados para busca
 	private static final String [] CAMPOS_BUSCA = {
 				"titulo", 
-				"autor", 
+				"autor",
 				"resumo"
 			};
 	
-	//Consultas para indexação padrão (sem stopword)
-	/**ADICIONAR ,"<NOVA CONSULTA> */
+	//Consultas para indexação padrão (sem stopword)	
 	private static final String [] CONSULTAS_NONE = {
-				"shallow"
+				CONSULTA_1,
+				"rnn", //remover
+				CONSULTA_2,
+				"cnn" //remover
+				
 			};
 	
-	//Consultas para indexação por stemming
-	/**ADICIONAR ,"<NOVA CONSULTA> */
+	//Consultas para indexação por stemming	
 	private static final String [] CONSULTAS_STEMMING = {
-			"shallow"
+			CONSULTA_1,
+			CONSULTA_2
 		};
 	
-	//Consultas para indexação padrão (com stopword)
-	/**ADICIONAR ,"<NOVA CONSULTA> */
-	private static final String [] CONSULTAS_STOPWORD = {
-			"shallow"
+	//Consultas para indexação padrão (com stopword)	
+	private static final String [] CONSULTAS_STOPWORD = {			
+			CONSULTA_1,
+			CONSULTA_2
 		};
 	
-	//Consultas para indexação por stemming e stopword
-	/**ADICIONAR ,"<NOVA CONSULTA> */
+	//Consultas para indexação por stemming e stopword	
 	private static final String [] CONSULTAS_STOP_STEMMING = {
-			"shallow"
+			CONSULTA_1,
+			CONSULTA_2
 		};
 	
-	//Consultas para indexação por ngram
-	/**ADICIONAR ,"<NOVA CONSULTA> */
+	//Consultas para indexação por ngram	
 	private static final String [] CONSULTAS_NGRAM = {
-			"shallow"
+			CONSULTA_1,
+			CONSULTA_2
 		};
 
 	public static void main(String[] args) throws IOException, ParseException {
@@ -175,7 +182,7 @@ public class Main {
 	}
 
 	public void search(IndexSearcher searcher, Query q) throws IOException {
-		TopDocs hits = searcher.search(q, 10);
+		TopDocs hits = searcher.search(q, QTD_MAX_RESULTADOS);
 		System.out.println("*******************************************************************************************");
 		System.out.println(hits.totalHits + " documentos encontrados para consulta " + q.toString());
 		System.out.println("*******************************************************************************************");
