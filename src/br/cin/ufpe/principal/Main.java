@@ -43,7 +43,7 @@ public class Main {
 	//Tamanho minimo e máximo do Ngram
 	public static final int MIN_GRAM = 1;
 	public static final int MAX_GRAM = 3;
-	public static final int QTD_MAX_RESULTADOS = 10;
+	public static final int QTD_MAX_RESULTADOS = 20;
 	
 	//Analizadores
 	private static final Analyzer NONE_ANALYZER = new StandardAnalyzer(new CharArraySet(new ArrayList<>(), true));
@@ -57,13 +57,13 @@ public class Main {
 	private static final boolean RUN_SEARCHES = true; //flag para executar buscas
 	
 	private static final boolean RUN_SEARCH_NONE = true; //flag para busca por indexação padrão (sem stopword)
-	private static final boolean RUN_SEARCH_STOPWORDS = false; //flag para busca por indexação padrão (com stopword)
-	private static final boolean RUN_SEARCH_STEMMING = false; //flag para busca por stemming
-	private static final boolean RUN_SEARCH_STOPWORDS_STEMMING = false; //flag para busca por stemming e stopword
-	private static final boolean RUN_SEARCH_NGRAM = true; //flag para busca por ngram
+	private static final boolean RUN_SEARCH_STOPWORDS = true; //flag para busca por indexação padrão (com stopword)
+	private static final boolean RUN_SEARCH_STEMMING = true; //flag para busca por stemming
+	private static final boolean RUN_SEARCH_STOPWORDS_STEMMING = true; //flag para busca por stemming e stopword
+	private static final boolean RUN_SEARCH_NGRAM = true;; //flag para busca por ngram
 	
-	private static final String CONSULTA_1 = "\"recurrent neural network\"";
-	private static final String CONSULTA_2 = "\"convolutional neural network\"";
+	private static final String CONSULTA_1 = "recurrent AND \"neural network\" AND in deep learning";
+	private static final String CONSULTA_2 = "convolutional AND \"neural network\" in deep learning";
 	
 	//Campos do documento indexados para busca
 	private static final String [] CAMPOS_BUSCA = {
@@ -75,10 +75,7 @@ public class Main {
 	//Consultas para indexação padrão (sem stopword)	
 	private static final String [] CONSULTAS_NONE = {
 				CONSULTA_1,
-				"rnn", //remover
-				CONSULTA_2,
-				"cnn" //remover
-				
+				CONSULTA_2
 			};
 	
 	//Consultas para indexação por stemming	
@@ -136,7 +133,7 @@ public class Main {
 		
 		if(RUN_SEARCH_STEMMING) {
 			System.out.println("------------------------------------------------- CONSULTAS STEMMING ----------------------------------------------------");
-			IndexSearcher searcher_stemming = createSearcher(INDEX_DIR_STOPWORDS);
+			IndexSearcher searcher_stemming = createSearcher(INDEX_DIR_STEMMING);
 			QueryParser query_parser_stemming = new MultiFieldQueryParser(CAMPOS_BUSCA, STEMMING_ANALYZER);
 			
 			for(String c : CONSULTAS_STEMMING) {
